@@ -45,12 +45,10 @@
    - Deve existir documento com UID do usuário
    - Campos obrigatórios: `email`, `displayName`, `currency: "EUR"`, `plan: "free"`, `createdAt`
 
-### Teste 2: Login Sem Token (Usuário Existente)
-1. Com o usuário criado no Teste 1, faça logout
-2. Clique em "Entrar"
-3. Use as mesmas credenciais do Teste 1
-4. **Verificar no console**: logs de verificação/atualização do Firestore
-5. **Verificar no Firestore**: documento deve continuar existindo
+### Teste 2: Tentativa de Cadastro com Email Existente
+1. Tente criar uma conta com o mesmo email do Teste 1
+2. **Verificar**: deve mostrar erro "Este e-mail já possui conta. Use outro e-mail ou baixe o app para fazer login."
+3. **Verificar**: não deve permitir cadastro duplicado
 
 ### Teste 3: Cadastro Com Token
 1. Acesse com token (ex: `https://seudominio.com/convite/ABC123`)

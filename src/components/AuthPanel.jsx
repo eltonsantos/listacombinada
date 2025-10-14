@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { auth } from '../lib/firebase'
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, onAuthStateChanged } from 'firebase/auth'
+import { createUserWithEmailAndPassword, updateProfile, onAuthStateChanged } from 'firebase/auth'
 import { joinByToken } from '../lib/functions'
 import { upsertUserDoc } from '../lib/user-store'
 import SuccessPanel from './SuccessPanel.jsx'
 
 export default function AuthPanel({ token }){
-  const [mode, setMode] = useState('signup') // 'signup' | 'signin' | 'success'
+  const [mode, setMode] = useState('signup') // 'signup' | 'success'
   const [status, setStatus] = useState('')
   const [errors, setErrors] = useState({})
   const [playUrl] = useState(import.meta.env.VITE_PLAY_URL || 'https://play.google.com/store/apps')
@@ -65,7 +65,7 @@ export default function AuthPanel({ token }){
     }catch(err){
       console.error('Erro no cadastro:', err)
       if(err?.code === 'auth/email-already-in-use'){
-        setError('email','Este e-mail já possui conta. Clique em "Entrar".')
+        setError('email','Este e-mail já possui conta. Use outro e-mail ou baixe o app para fazer login.')
         setStatus('')
       }else if(err?.code === 'functions/not-found'){
         setStatus('Convite não encontrado ou expirado.')
@@ -77,46 +77,6 @@ export default function AuthPanel({ token }){
     }
   }
 
-  async function handleSignin(e){
-    e.preventDefault()
-    clearErrors()
-    const email = e.currentTarget['email-in'].value.trim()
-    const password = e.currentTarget['password-in'].value
-    if(!email) return setError('email-in','Informe seu e-mail')
-    if(password.length < 6) return setError('password-in','Senha inválida')
-
-    try{
-      setStatus('Verificando credenciais...')
-      const cred = await signInWithEmailAndPassword(auth, email, password)
-      
-      // Garantir que o usuário existe no Firestore (caso tenha sido criado antes da implementação)
-      if(!token){
-        console.log('📝 Verificando/garantindo persistência do usuário no Firestore...')
-        await upsertUserDoc(cred.user.uid, {
-          email: cred.user.email,
-          displayName: cred.user.displayName,
-          currency: "EUR",
-          plan: "free",
-        })
-        console.log('✅ Usuário verificado/atualizado no Firestore')
-      }
-      
-      if(token){
-        await joinByToken(token)
-      }
-      setMode('success')
-      setStatus('')
-    }catch(err){
-      console.error('Erro no login:', err)
-      if(err?.code === 'functions/not-found'){
-        setStatus('Convite não encontrado ou expirado.')
-      }else if(err?.code === 'functions/unauthenticated'){
-        setStatus('Erro de autenticação. Tente novamente.')
-      }else{
-        setStatus('Falha ao entrar. Verifique e tente novamente.')
-      }
-    }
-  }
 
   return (
     <div className="right">
@@ -125,7 +85,7 @@ export default function AuthPanel({ token }){
           message={token ? 'Pronto! Agora você já faz parte da LISTA COMBINADA!' : 'Conta criada! Agora baixe o Lista Combinada na Play Store.'}
           playUrl={playUrl}
         />
-      ) : mode === 'signup' ? (
+      ) : (
         <form className="form" onSubmit={handleSignup} noValidate>
           <h2>Crie sua conta</h2>
 
@@ -154,27 +114,6 @@ export default function AuthPanel({ token }){
           </div>
 
           <button className="btn" type="submit">Criar conta {token ? 'e entrar no grupo' : ''}</button>
-          <p className="alt-auth">Já tem conta? <a href="#" onClick={(e)=>{e.preventDefault(); setMode('signin')}}>Entrar</a></p>
-          <div className="status">{status}</div>
-        </form>
-      ) : (
-        <form className="form" onSubmit={handleSignin} noValidate>
-          <h2>Entrar</h2>
-
-          <div className="field">
-            <label htmlFor="email-in">E-mail</label>
-            <input id="email-in" name="email-in" type="email" placeholder="voce@email.com" />
-            <span className="error">{errors['email-in'] || ''}</span>
-          </div>
-
-          <div className="field">
-            <label htmlFor="password-in">Senha</label>
-            <input id="password-in" name="password-in" type="password" placeholder="••••••••" />
-            <span className="error">{errors['password-in'] || ''}</span>
-          </div>
-
-          <button className="btn" type="submit">Entrar {token ? 'e aceitar convite' : ''}</button>
-          <p className="alt-auth">Novo por aqui? <a href="#" onClick={(e)=>{e.preventDefault(); setMode('signup')}}>Criar conta</a></p>
           <div className="status">{status}</div>
         </form>
       )}

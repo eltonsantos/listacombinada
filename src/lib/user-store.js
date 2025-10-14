@@ -1,17 +1,10 @@
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { db } from "./firebase";
 
-export type AppUser = {
-  email: string;
-  displayName: string | null;
-  currency?: "EUR" | "BRL" | "USD";
-  plan?: "free" | "pro";
-};
-
 /**
  * Cria ou atualiza o documento do usuário no Firestore
  * @param {string} uid - ID do usuário
- * @param {AppUser} data - Dados do usuário
+ * @param {Object} data - Dados do usuário {email, displayName, currency?, plan?}
  * @returns {Promise<Object>} Dados persistidos no Firestore
  */
 export async function upsertUserDoc(uid, data) {

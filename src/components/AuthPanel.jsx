@@ -12,7 +12,7 @@ export default function AuthPanel({ token }){
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
-      if(user && token){
+      if(user && token && mode !== 'success'){
         try{
           await joinByToken(token)
           setMode('success')
@@ -21,7 +21,7 @@ export default function AuthPanel({ token }){
       }
     })
     return () => unsub()
-  }, [token])
+  }, [token, mode])
 
   function setError(field, msg){
     setErrors(prev => ({ ...prev, [field]: msg }))

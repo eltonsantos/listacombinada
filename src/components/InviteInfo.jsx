@@ -27,16 +27,16 @@ export default function InviteInfo({ token }){
   }, [token])
 
   const title = token
-    ? (groupName ? `Você foi convidado(a) para o grupo ${groupName}!` : 'Você foi convidado(a) para um grupo!')
-    : 'Venha fazer parte do Lista Combinada'
+    ? `Você foi convidado(a) para o grupo ${groupName || ''}!`.trim()
+    : 'Você foi convidado(a) para um grupo!'
 
   return (
     <div className="left">
       <h1>{title}</h1>
       {token ? (
-        <p className="muted">Convite enviado por <strong>{loading ? 'carregando...' : inviterName}</strong></p>
+        <p className="muted">Convite enviado por <strong>{loading ? 'carregando...' : inviterName}</strong> da Lista Combinada</p>
       ) : (
-        <p className="muted">Crie sua conta gratuita e comece a compartilhar listas em tempo real.</p>
+        <p className="muted">Convite enviado por um membro da Lista Combinada</p>
       )}
 
       <ul className="benefits">

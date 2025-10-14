@@ -1,0 +1,18 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Regras para coleção users
+    match /users/{uid} {
+      allow create, update, read: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Regras para coleção groups
+    match /groups/{groupId} {
+      allow read: if request.auth != null && (request.resource.data.members[request.auth.uid] == true);
+      allow create, update: if request.auth != null && (
+        request.resource.data.ownerId == request.auth.uid ||
+        resource.data.ownerId == request.auth.uid
+      );
+    }
+  }
+}

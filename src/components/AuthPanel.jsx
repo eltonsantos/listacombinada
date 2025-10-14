@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { auth } from '../lib/firebase'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, onAuthStateChanged } from 'firebase/auth'
 import { joinByToken } from '../lib/functions'
+import { upsertUserDoc } from '../lib/user-store'
 import SuccessPanel from './SuccessPanel.jsx'
 
 export default function AuthPanel({ token }){
@@ -45,6 +46,17 @@ export default function AuthPanel({ token }){
       setStatus('Criando sua conta...')
       const cred = await createUserWithEmailAndPassword(auth, email, password)
       await updateProfile(cred.user, { displayName: name })
+      
+      // 🔴 Obrigatório: persistir no Firestore e AGUARDAR
+      console.log('📝 Persistindo usuário no Firestore...')
+      await upsertUserDoc(cred.user.uid, {
+        email,
+        displayName: name,
+        currency: "EUR",
+        plan: "free",
+      })
+      console.log('✅ Usuário persistido com sucesso no Firestore')
+      
       if(token){
         await joinByToken(token)
       }
@@ -75,7 +87,20 @@ export default function AuthPanel({ token }){
 
     try{
       setStatus('Verificando credenciais...')
-      await signInWithEmailAndPassword(auth, email, password)
+      const cred = await signInWithEmailAndPassword(auth, email, password)
+      
+      // Garantir que o usuário existe no Firestore (caso tenha sido criado antes da implementação)
+      if(!token){
+        console.log('📝 Verificando/garantindo persistência do usuário no Firestore...')
+        await upsertUserDoc(cred.user.uid, {
+          email: cred.user.email,
+          displayName: cred.user.displayName,
+          currency: "EUR",
+          plan: "free",
+        })
+        console.log('✅ Usuário verificado/atualizado no Firestore')
+      }
+      
       if(token){
         await joinByToken(token)
       }

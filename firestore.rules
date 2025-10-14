@@ -1,18 +1,29 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Regras para coleção users
-    match /users/{uid} {
-      allow create, update, read: if request.auth != null && request.auth.uid == uid;
+    
+    function isSignedIn() { 
+      return request.auth != null; 
     }
 
-    // Regras para coleção groups
+    // Regras para coleção users
+    match /users/{uid} {
+      allow read, create, update: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    // Regras para subcoleção groups/{groupId}/members/{uid}
     match /groups/{groupId} {
-      allow read: if request.auth != null && (request.resource.data.members[request.auth.uid] == true);
-      allow create, update: if request.auth != null && (
-        request.resource.data.ownerId == request.auth.uid ||
-        resource.data.ownerId == request.auth.uid
-      );
+      match /members/{uid} {
+        allow read: if isSignedIn() && request.auth.uid == uid;
+        // Permite criação/atualização pelo próprio usuário (via convite)
+        allow create, update: if isSignedIn() && request.auth.uid == uid;
+      }
+    }
+
+    // Regras para convites - leitura pública para renderizar cabeçalho
+    match /invites/{token} {
+      allow read: if true; // Para renderizar o cabeçalho da página
+      allow create, update: if false; // Apenas via backend/cloud functions
     }
   }
 }

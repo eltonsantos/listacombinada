@@ -1,0 +1,146 @@
+import React, { useEffect, useState } from 'react'
+import { auth } from '../lib/firebase'
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, onAuthStateChanged } from 'firebase/auth'
+import { joinByToken } from '../lib/functions'
+import SuccessPanel from './SuccessPanel.jsx'
+
+export default function AuthPanel({ token }){
+  const [mode, setMode] = useState('signup') // 'signup' | 'signin' | 'success'
+  const [status, setStatus] = useState('')
+  const [errors, setErrors] = useState({})
+  const [playUrl] = useState(import.meta.env.VITE_PLAY_URL || 'https://play.google.com/store/apps')
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, async (user) => {
+      if(user && token){
+        try{
+          await joinByToken(token)
+          setMode('success')
+          setStatus('')
+        }catch(e){ /* silencioso */ }
+      }
+    })
+    return () => unsub()
+  }, [token])
+
+  function setError(field, msg){
+    setErrors(prev => ({ ...prev, [field]: msg }))
+  }
+  function clearErrors(){ setErrors({}); setStatus('') }
+
+  async function handleSignup(e){
+    e.preventDefault()
+    clearErrors()
+    const name = e.currentTarget.name.value.trim()
+    const email = e.currentTarget.email.value.trim()
+    const password = e.currentTarget.password.value
+    const confirm = e.currentTarget.confirm.value
+
+    if(!name) return setError('name','Informe seu nome')
+    if(!email) return setError('email','Informe seu e-mail')
+    if(password.length < 6) return setError('password','Mínimo 6 caracteres')
+    if(password !== confirm) return setError('confirm','As senhas não coincidem')
+
+    try{
+      setStatus('Criando sua conta...')
+      const cred = await createUserWithEmailAndPassword(auth, email, password)
+      await updateProfile(cred.user, { displayName: name })
+      if(token){
+        await joinByToken(token)
+      }
+      setMode('success')
+      setStatus('')
+    }catch(err){
+      if(err?.code === 'auth/email-already-in-use'){
+        setError('email','Este e-mail já possui conta. Clique em "Entrar".')
+        setStatus('')
+      }else{
+        setStatus('Erro ao criar conta. Tente novamente.')
+      }
+    }
+  }
+
+  async function handleSignin(e){
+    e.preventDefault()
+    clearErrors()
+    const email = e.currentTarget['email-in'].value.trim()
+    const password = e.currentTarget['password-in'].value
+    if(!email) return setError('email-in','Informe seu e-mail')
+    if(password.length < 6) return setError('password-in','Senha inválida')
+
+    try{
+      setStatus('Verificando credenciais...')
+      await signInWithEmailAndPassword(auth, email, password)
+      if(token){
+        await joinByToken(token)
+      }
+      setMode('success')
+      setStatus('')
+    }catch(err){
+      setStatus('Falha ao entrar. Verifique e tente novamente.')
+    }
+  }
+
+  return (
+    <div className="right">
+      {mode === 'success' ? (
+        <SuccessPanel
+          message={token ? 'Pronto! Agora você já faz parte da LISTA COMBINADA!' : 'Conta criada! Agora baixe o Lista Combinada na Play Store.'}
+          playUrl={playUrl}
+        />
+      ) : mode === 'signup' ? (
+        <form className="form" onSubmit={handleSignup} noValidate>
+          <h2>Crie sua conta</h2>
+
+          <div className="field">
+            <label htmlFor="name">Nome completo</label>
+            <input id="name" name="name" type="text" placeholder="Seu nome" />
+            <span className="error">{errors['name'] || ''}</span>
+          </div>
+
+          <div className="field">
+            <label htmlFor="email">E-mail</label>
+            <input id="email" name="email" type="email" placeholder="voce@email.com" />
+            <span className="error">{errors['email'] || ''}</span>
+          </div>
+
+          <div className="field">
+            <label htmlFor="password">Senha</label>
+            <input id="password" name="password" type="password" placeholder="••••••••" />
+            <span className="error">{errors['password'] || ''}</span>
+          </div>
+
+          <div className="field">
+            <label htmlFor="confirm">Repetir senha</label>
+            <input id="confirm" name="confirm" type="password" placeholder="••••••••" />
+            <span className="error">{errors['confirm'] || ''}</span>
+          </div>
+
+          <button className="btn" type="submit">Criar conta {token ? 'e entrar no grupo' : ''}</button>
+          <p className="alt-auth">Já tem conta? <a href="#" onClick={(e)=>{e.preventDefault(); setMode('signin')}}>Entrar</a></p>
+          <div className="status">{status}</div>
+        </form>
+      ) : (
+        <form className="form" onSubmit={handleSignin} noValidate>
+          <h2>Entrar</h2>
+
+          <div className="field">
+            <label htmlFor="email-in">E-mail</label>
+            <input id="email-in" name="email-in" type="email" placeholder="voce@email.com" />
+            <span className="error">{errors['email-in'] || ''}</span>
+          </div>
+
+          <div className="field">
+            <label htmlFor="password-in">Senha</label>
+            <input id="password-in" name="password-in" type="password" placeholder="••••••••" />
+            <span className="error">{errors['password-in'] || ''}</span>
+          </div>
+
+          <button className="btn" type="submit">Entrar {token ? 'e aceitar convite' : ''}</button>
+          <p className="alt-auth">Novo por aqui? <a href="#" onClick={(e)=>{e.preventDefault(); setMode('signup')}}>Criar conta</a></p>
+          <div className="status">{status}</div>
+        </form>
+      )}
+    </div>
+  )
+}

@@ -14,10 +14,12 @@ export default function InviteInfo({ token }){
       try{
         const data = await getInvitePublicInfo(token)
         if(!mounted) return
-        setInviterName(data?.inviterName || 'um membro da Lista Combinada')
+        setInviterName(data?.inviterName || 'um membro')
         setGroupName(data?.groupName || '')
       }catch(e){
-        setInviterName('um membro da Lista Combinada')
+        console.error('Erro ao carregar convite:', e)
+        setInviterName('um membro')
+        setGroupName('')
       }finally{
         setLoading(false)
       }

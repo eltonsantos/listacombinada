@@ -51,9 +51,14 @@ export default function AuthPanel({ token }){
       setMode('success')
       setStatus('')
     }catch(err){
+      console.error('Erro no cadastro:', err)
       if(err?.code === 'auth/email-already-in-use'){
         setError('email','Este e-mail já possui conta. Clique em "Entrar".')
         setStatus('')
+      }else if(err?.code === 'functions/not-found'){
+        setStatus('Convite não encontrado ou expirado.')
+      }else if(err?.code === 'functions/unauthenticated'){
+        setStatus('Erro de autenticação. Tente novamente.')
       }else{
         setStatus('Erro ao criar conta. Tente novamente.')
       }
@@ -77,7 +82,14 @@ export default function AuthPanel({ token }){
       setMode('success')
       setStatus('')
     }catch(err){
-      setStatus('Falha ao entrar. Verifique e tente novamente.')
+      console.error('Erro no login:', err)
+      if(err?.code === 'functions/not-found'){
+        setStatus('Convite não encontrado ou expirado.')
+      }else if(err?.code === 'functions/unauthenticated'){
+        setStatus('Erro de autenticação. Tente novamente.')
+      }else{
+        setStatus('Falha ao entrar. Verifique e tente novamente.')
+      }
     }
   }
 

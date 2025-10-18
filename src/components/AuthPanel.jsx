@@ -1,6 +1,6 @@
+import { createUserWithEmailAndPassword, onAuthStateChanged, updateProfile } from 'firebase/auth'
 import React, { useEffect, useState } from 'react'
 import { auth } from '../lib/firebase'
-import { createUserWithEmailAndPassword, updateProfile, onAuthStateChanged } from 'firebase/auth'
 import { joinByToken } from '../lib/functions'
 import { upsertUserDoc } from '../lib/user-store'
 import SuccessPanel from './SuccessPanel.jsx'
@@ -82,8 +82,12 @@ export default function AuthPanel({ token }){
     <div className="right">
       {mode === 'success' ? (
         <SuccessPanel
-          message={token ? 'Pronto! Agora você já faz parte da LISTA COMBINADA!' : 'Conta criada! Agora baixe o Lista Combinada na Play Store.'}
+          message={token 
+            ? 'Pronto! Agora você já faz parte do grupo!' 
+            : 'Conta criada com sucesso!'
+          }
           playUrl={playUrl}
+          hasToken={!!token}
         />
       ) : (
         <form className="form" onSubmit={handleSignup} noValidate>
@@ -113,7 +117,9 @@ export default function AuthPanel({ token }){
             <span className="error">{errors['confirm'] || ''}</span>
           </div>
 
-          <button className="btn" type="submit">Criar conta {token ? 'e entrar no grupo' : ''}</button>
+          <button className="btn" type="submit">
+            {token ? 'Criar conta e entrar no grupo' : 'Criar conta'}
+          </button>
           <div className="status">{status}</div>
         </form>
       )}

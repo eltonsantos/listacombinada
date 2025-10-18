@@ -29,7 +29,9 @@ export default function InviteInfo({ token }){
 
   // Determinar título e subtítulo baseado na presença do token
   const title = token
-    ? `Você foi convidado(a) para o grupo ${groupName || ''}!`.trim()
+    ? groupName 
+      ? `Você foi convidado(a) para o grupo ${groupName}!`
+      : 'Você foi convidado(a) para um grupo!'
     : 'Crie grupos e convide seus amigos!'
 
   const subtitle = token
@@ -50,7 +52,7 @@ export default function InviteInfo({ token }){
 
       {token && (
         <div className="app-cta">
-          <a className="btn ghost" href={`'${import.meta.env.VITE_APP_SCHEME || 'listacombinada'}://invite/' + token`}>Abrir no app (se já tiver instalado)</a>
+          <a className="btn ghost" href={`${import.meta.env.VITE_APP_SCHEME || 'listacombinada'}://invite/${token}`}>Abrir no app (se já tiver instalado)</a>
         </div>
       )}
     </div>

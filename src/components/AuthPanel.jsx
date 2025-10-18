@@ -1,5 +1,5 @@
-import { createUserWithEmailAndPassword, onAuthStateChanged, updateProfile } from 'firebase/auth'
-import React, { useEffect, useState } from 'react'
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
+import React, { useState } from 'react'
 import { auth } from '../lib/firebase'
 import { joinByToken } from '../lib/functions'
 import { upsertUserDoc } from '../lib/user-store'
@@ -10,19 +10,6 @@ export default function AuthPanel({ token }){
   const [status, setStatus] = useState('')
   const [errors, setErrors] = useState({})
   const [playUrl] = useState(import.meta.env.VITE_PLAY_URL || 'https://play.google.com/store/apps')
-
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (user) => {
-      if(user && token && mode !== 'success'){
-        try{
-          await joinByToken(token)
-          setMode('success')
-          setStatus('')
-        }catch(e){ /* silencioso */ }
-      }
-    })
-    return () => unsub()
-  }, [token, mode])
 
   function setError(field, msg){
     setErrors(prev => ({ ...prev, [field]: msg }))

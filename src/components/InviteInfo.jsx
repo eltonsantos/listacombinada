@@ -1,5 +1,4 @@
-import React from 'react'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { getInvitePublicInfo } from '../lib/functions'
 
 export default function InviteInfo({ token }){
@@ -28,18 +27,21 @@ export default function InviteInfo({ token }){
     return () => { mounted = false }
   }, [token])
 
+  // Determinar título e subtítulo baseado na presença do token
   const title = token
-    ? `Você foi convidado(a) para o grupo ${groupName || ''}!`.trim()
-    : 'Você foi convidado(a) para um grupo!'
+    ? groupName 
+      ? `Você foi convidado(a) para o grupo ${groupName}!`
+      : 'Você foi convidado(a) para um grupo!'
+    : 'Crie grupos e convide seus amigos!'
+
+  const subtitle = token
+    ? `Convite enviado por ${loading ? 'carregando...' : inviterName} da Lista Combinada`
+    : 'Faça parte da Lista Combinada'
 
   return (
     <div className="left">
       <h1>{title}</h1>
-      {token ? (
-        <p className="muted">Convite enviado por <strong>{loading ? 'carregando...' : inviterName}</strong> da Lista Combinada</p>
-      ) : (
-        <p className="muted">Convite enviado por um membro da Lista Combinada</p>
-      )}
+      <p className="muted">{subtitle}</p>
 
       <ul className="benefits">
         <li>✅ Crie e compartilhe listas em tempo real com sua família e amigos.</li>
@@ -50,7 +52,7 @@ export default function InviteInfo({ token }){
 
       {token && (
         <div className="app-cta">
-          <a className="btn ghost" href={`'${import.meta.env.VITE_APP_SCHEME || 'listacombinada'}://invite/' + token`}>Abrir no app (se já tiver instalado)</a>
+          <a className="btn ghost" href={`${import.meta.env.VITE_APP_SCHEME || 'listacombinada'}://invite/${token}`}>Abrir no app (se já tiver instalado)</a>
         </div>
       )}
     </div>

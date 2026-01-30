@@ -16,12 +16,13 @@ export default function InviteInfo({ token }){
         setInviterName(data?.inviterName || 'um membro')
         setGroupName(data?.groupName || '')
       }catch(e){
-        console.error('Token inválido ou não encontrado:', e)
-        // Token inválido - redirecionar para home
+        console.error('Erro ao carregar informações do convite:', e)
+        // Token com formato válido mas não encontrado/expirado no backend
+        // Mostrar valores padrão ao invés de redirecionar
         if(mounted){
-          window.location.href = '/'
+          setInviterName('um membro')
+          setGroupName('')
         }
-        return
       }finally{
         if(mounted){
           setLoading(false)

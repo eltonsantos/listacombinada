@@ -79,6 +79,71 @@ input:focus{ border-color: #334155; box-shadow: 0 0 0 3px rgba(51,65,85,.25); }
 
 .hidden{ display:none !important; }
 
+/* Token Expirado */
+.expired-panel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 350px;
+  padding: 40px;
+  width: 100%;
+}
+.expired-content {
+  text-align: center;
+  max-width: 400px;
+}
+.expired-logo {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 16px;
+}
+.expired-icon {
+  font-size: 56px;
+  margin-bottom: 16px;
+}
+.expired-message {
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+.expired-panel h2 {
+  font-size: 24px;
+  margin-bottom: 12px;
+  color: #fca5a5;
+}
+.expired-panel .muted {
+  margin-bottom: 24px;
+}
+.expired-panel .btn {
+  margin-top: 8px;
+}
+
+/* Loading State */
+.loading-panel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 350px;
+  padding: 40px;
+  width: 100%;
+}
+.loading-content {
+  text-align: center;
+}
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid var(--line);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 @media (max-width: 900px){
   .grid{ grid-template-columns: 1fr; }
   .left{ border-right: 0; border-bottom:1px solid var(--line); }
